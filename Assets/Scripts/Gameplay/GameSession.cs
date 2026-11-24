@@ -37,6 +37,9 @@ namespace Armanya.Gameplay
             cachedPlayerHealth = FindFirstObjectByType<Player.PlayerHealth>();
         }
 
+        /// <summary>Cambia qué héroe muestra el HUD (lo llama el TagTeamManager al alternar).</summary>
+        public void SetPlayerHealth(Player.PlayerHealth health) => cachedPlayerHealth = health;
+
         /// <summary>Añade una pista de lore al contador del nivel.</summary>
         public void CollectLoreClue(string clueTitle = "")
         {
