@@ -6,27 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/2DGamekit/Scenes/Start.unity
-    guid: 57df1e417250bc247976c2c0dc088efe
+    path: Assets/Scenes/Menu_Inicio.unity
+    guid: 8f13b4b873091be4b8c7d08d98568045
   - enabled: 1
-    path: Assets/2DGamekit/Scenes/Zone1.unity
-    guid: a94cb8f134bf81349ad016c79b629e3d
+    path: Assets/Scenes/Biomes/Level1_GrietaArida.unity
+    guid: aa19a8f706e9a674ea31e89f3763392b
   - enabled: 1
-    path: Assets/2DGamekit/Scenes/Zone2.unity
-    guid: 5436c67e9267f17458b31fcdc20cd20a
+    path: Assets/Scenes/Biomes/Level2_DistritoCaos.unity
+    guid: 6bcb6c924eb770248880a38043727375
   - enabled: 1
-    path: Assets/2DGamekit/Scenes/Zone3.unity
-    guid: 4b4b0e246fc7dbb4295a38fd03241362
+    path: Assets/Scenes/Biomes/Level3_NexoOrbital.unity
+    guid: 3213910d19a48b448be1433c026a9ee6
   - enabled: 1
-    path: Assets/2DGamekit/Scenes/Zone4.unity
-    guid: 5b0c2d9ddd151ba489db19a4fb634327
-  - enabled: 1
-    path: Assets/2DGamekit/Scenes/Zone5.unity
-    guid: 960b12f881940d84983273421bebc695
-  - enabled: 1
-    path: Assets/2DGamekit/Scenes/UI/UIMenus.unity
-    guid: 705f1f73151a73046842d4e4ec8f514d
-  - enabled: 1
-    path: Assets/2DGamekit/Scenes/UI/Loading.unity
-    guid: ebc4647ff02971c4ba1b207af066be4d
+    path: Assets/Scenes/Biomes/Level4_RuinasFinales.unity
+    guid: fc6fde6498371344b9c57f0521f289e4
   m_configObjects: {}

@@ -1,17 +1,18 @@
 using UnityEngine;
+using Armanya.Gameplay;
 using Armanya.Player;
 
 namespace Armanya.Interactables
 {
     /// <summary>
     /// Orbe de Estabilidad Dimensional. Al entrar en contacto con Trigger 2D,
-    /// otorga +15 HP al jugador (respetando la vida máxima) y se consume.
+    /// otorga +15 HP al jugador (compatible con HealthSystem y PlayerHealth) y se consume.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class StabilityOrb : MonoBehaviour
     {
         [Header("Configuración")]
-        [SerializeField] float healAmount = 15f;
+        [SerializeField] int healAmount = 15;
         [Tooltip("Si es true, solo se recoge si el jugador tiene menos de la vida máxima.")]
         [SerializeField] bool onlyCollectIfDamaged = true;
 
@@ -38,27 +39,35 @@ namespace Armanya.Interactables
         {
             if (consumed) return;
 
-            // Buscar PlayerHealth en el objeto que colisionó o en su raíz
-            var health = other.GetComponent<PlayerHealth>() ?? other.GetComponentInParent<PlayerHealth>();
-            if (health == null) return;
-
-            if (onlyCollectIfDamaged && health.CurrentHealth >= health.MaxHealth)
-            {
-                // Ya tiene la vida llena, no gastar el orbe
+            // Solo el jugador puede recoger orbes
+            if (other.GetComponent<PlayerController2D>() == null && other.GetComponentInParent<PlayerController2D>() == null)
                 return;
+
+            // 1. Intentar curar HealthSystem (nuevo sistema unificado)
+            var healthSys = other.GetComponent<HealthSystem>();
+            if (healthSys == null) healthSys = other.GetComponentInParent<HealthSystem>();
+            var playerHealth = other.GetComponent<PlayerHealth>();
+            if (playerHealth == null) playerHealth = other.GetComponentInParent<PlayerHealth>();
+
+            bool healedAny = false;
+
+            if (healthSys != null)
+            {
+                if (!onlyCollectIfDamaged || healthSys.CurrentHealth < healthSys.MaxHealth)
+                    healedAny |= healthSys.Heal(healAmount);
             }
 
-            consumed = true;
-            bool healed = health.Heal(healAmount);
-
-            if (healed)
+            if (playerHealth != null)
             {
+                if (!onlyCollectIfDamaged || playerHealth.CurrentHealth < playerHealth.MaxHealth)
+                    healedAny |= playerHealth.Heal(healAmount);
+            }
+
+            if (healedAny)
+            {
+                consumed = true;
                 Debug.Log($"[Orbe] Orbe de Estabilidad Dimensional consumido (+{healAmount} HP).", this);
                 Destroy(gameObject);
-            }
-            else
-            {
-                consumed = false;
             }
         }
     }

@@ -22,8 +22,10 @@ namespace Armanya.Interactables
 
         [Header("Visual (opcional)")]
         [SerializeField] SpriteRenderer targetRenderer;
-        [SerializeField] Color brokenColor = new Color(0.5f, 0.1f, 0.1f, 1f);
-        [SerializeField] Color repairedColor = new Color(0.2f, 1f, 0.4f, 1f);
+        [SerializeField] Sprite brokenSprite;
+        [SerializeField] Sprite repairedSprite;
+        [SerializeField] Color brokenColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+        [SerializeField] Color repairedColor = Color.white;
 
         public bool IsRepaired => isRepaired;
         public string GeneratorName => generatorName;
@@ -57,7 +59,18 @@ namespace Armanya.Interactables
         void ApplyVisual()
         {
             if (targetRenderer != null)
-                targetRenderer.color = isRepaired ? repairedColor : brokenColor;
+            {
+                if (isRepaired)
+                {
+                    if (repairedSprite != null) targetRenderer.sprite = repairedSprite;
+                    targetRenderer.color = repairedColor;
+                }
+                else
+                {
+                    if (brokenSprite != null) targetRenderer.sprite = brokenSprite;
+                    targetRenderer.color = brokenColor;
+                }
+            }
         }
 
         void OnValidate()

@@ -12,18 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e58b3b3dced0e734ea11c802b4419cfe, type: 3}
   m_Name: Angus_Basic
   m_EditorClassIdentifier: Assembly-CSharp::Armanya.Abilities.AbilityData
-  abilityName: Ataque
+  abilityName: "Arco El\xE9ctrico"
   shape: 0
-  cooldown: 0.5
+  cooldown: 0.55
   targetLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  damage: 10
-  range: 1.5
-  height: 1
+  damage: 25
+  range: 2
+  height: 1.4
+  knockbackForce: 8
+  stunDuration: 0
+  dashDuration: 0
+  dashSpeed: 0
   projectilePrefab: {fileID: 0}
-  projectileSpeed: 12
+  projectileSpeed: 0
   projectileLifetime: 2
+  vfxPrefab: {fileID: 3539363324055420897, guid: 10feaf068a0a26d4488a859a511edbcc, type: 3}
+  vfxColor: {r: 1, g: 0.92, b: 0.25, a: 0.92}
+  vfxLifetime: 0.25
   restoration: 0
   effectDuration: 3
   restorationAmount: 0
