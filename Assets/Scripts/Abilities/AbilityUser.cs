@@ -93,6 +93,10 @@ namespace Armanya.Abilities
 
             if (isSecret && data.restoration != RestorationEffect.None)
                 ApplyRestoration(data);
+
+            // Game Feel: Camera Shake al activar Poder Secreto (K)
+            if (isSecret)
+                Armanya.CameraSystem.CameraFollow2D.Shake(0.22f, 0.20f);
         }
 
         int Facing => controller != null ? controller.FacingDirection : 1;
@@ -231,8 +235,10 @@ namespace Armanya.Abilities
         void OnGUI()
         {
             if (!showDebugHud) return;
-            DrawBar(10, 10, "J / Clic izq", basicAttack, basicReadyTime);
-            DrawBar(10, 36, "K / Clic der", secretPower, secretReadyTime);
+            // Ubicado en la esquina inferior izquierda para no estorbar los corazones ni la vista
+            float yBase = Screen.height - 56f;
+            DrawBar(12, yBase,      "[J]", basicAttack, basicReadyTime);
+            DrawBar(12, yBase + 24, "[K]", secretPower, secretReadyTime);
         }
 
         void DrawBar(float x, float y, string label, AbilityData d, float readyTime)

@@ -302,6 +302,8 @@ MonoBehaviour:
   damageFlashColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   flashDuration: 0.12
   flashCount: 2
+  hitVfxPrefab: {fileID: 1618430331360934, guid: 8b019aae9fde32e41aa6181013f53be2, type: 3}
+  deathVfxPrefab: {fileID: 1385443307219604, guid: 61a6972b233f54246b0d0c15eabfb857, type: 3}
   stunTintColor: {r: 0.75, g: 0.85, b: 1, a: 1}
   destroyOnDeath: 1
   dropOrbOnDeath: 1
@@ -332,12 +334,14 @@ MonoBehaviour:
   meleeAttackRange: 1.6
   hoverAmplitude: 0
   hoverSpeed: 2.2
-  projectilePrefab: {fileID: 4088836774078894697, guid: 9669d0afbcd5d444bba41e659e5f5fde, type: 3}
+  projectilePrefab: {fileID: 7180076506451036230, guid: a47c0dacfc69cc648a3399c3c3973f83, type: 3}
   firePoint: {fileID: 650608864955703922}
   projectileSpeed: 8
   attackDamage: 15
   attackCooldown: 1.9
   spriteFacesRightByDefault: 1
+  useNavMeshIfAvailable: 1
+  perceptionInterval: 0.2
 --- !u!1 &6388900198849148128
 GameObject:
   m_ObjectHideFlags: 0

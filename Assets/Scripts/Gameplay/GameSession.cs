@@ -1,11 +1,12 @@
 using System;
 using UnityEngine;
+using Gamekit2D;
 
 namespace Armanya.Gameplay
 {
     /// <summary>
-    /// Controla el progreso del nivel: pistas de lore y HUD de prueba.
-    /// Singleton simple y accesible para cualquier recolectable.
+    /// Controla el progreso del nivel: pistas de lore (enlazadas al KeyUI superior derecho),
+    /// puntaje y notificaciones visibles al recoger vida o pistas.
     /// </summary>
     public class GameSession : MonoBehaviour
     {
@@ -13,14 +14,53 @@ namespace Armanya.Gameplay
 
         [Header("Pistas de Lore")]
         [SerializeField] int totalCluesInLevel = 3;
-        [SerializeField] bool showDebugHud = true;
+        [SerializeField] bool showScoreHud = true;
 
         public int CurrentClues { get; private set; }
         public int TotalClues => totalCluesInLevel;
+        public int CurrentScore => GameManager.Instance != null ? GameManager.Instance.Score : localScore;
 
         public event Action<int, int> OnClueCollected; // (current, total)
+        public event Action<int> OnScoreUpdated;
 
         Player.PlayerHealth cachedPlayerHealth;
+        int localScore;
+
+        // Notificación flotante visible al recoger vida / pistas
+        string popupText;
+        Color popupColor = Color.white;
+        float popupTimer;
+        float popupDuration = 2.2f;
+
+        /// <summary>Suma puntos al marcador global (o local si se prueba la escena directamente).</summary>
+        public static void AddPoints(int points, string reason = "")
+        {
+            if (points <= 0) return;
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddScore(points, reason);
+            }
+            else if (Instance != null)
+            {
+                Instance.localScore += points;
+                string detail = string.IsNullOrEmpty(reason) ? "" : $" ({reason})";
+                Debug.Log($"[Puntaje] +{points} pts{detail} -> Total: {Instance.localScore}");
+            }
+
+            if (Instance != null)
+                Instance.OnScoreUpdated?.Invoke(Instance.CurrentScore);
+        }
+
+        /// <summary>Muestra un aviso visual llamativo en pantalla al recoger vida, orbes o pistas.</summary>
+        public static void ShowPickupNotification(string message, Color color, float duration = 2.2f)
+        {
+            if (Instance == null) return;
+            Instance.popupText = message;
+            Instance.popupColor = color;
+            Instance.popupDuration = duration;
+            Instance.popupTimer = duration;
+        }
 
         void Awake()
         {
@@ -35,15 +75,28 @@ namespace Armanya.Gameplay
         void Start()
         {
             cachedPlayerHealth = FindFirstObjectByType<Player.PlayerHealth>();
+            SyncKeyUI();
         }
 
-        /// <summary>Cambia qué héroe muestra el HUD (lo llama el TagTeamManager al alternar).</summary>
+        void Update()
+        {
+            if (popupTimer > 0f)
+                popupTimer -= Time.unscaledDeltaTime;
+        }
+
+        /// <summary>Cambia qué héroe está activo (lo llama el TagTeamManager al alternar).</summary>
         public void SetPlayerHealth(Player.PlayerHealth health) => cachedPlayerHealth = health;
 
-        /// <summary>Añade una pista de lore al contador del nivel.</summary>
+        /// <summary>Añade una pista de lore al contador del nivel, marca el icono superior derecho y otorga puntos.</summary>
         public void CollectLoreClue(string clueTitle = "")
         {
             CurrentClues = Mathf.Min(totalCluesInLevel, CurrentClues + 1);
+            AddPoints(250, string.IsNullOrEmpty(clueTitle) ? "Pista de Lore" : clueTitle);
+            SyncKeyUI();
+
+            string label = string.IsNullOrEmpty(clueTitle) ? "Pista de Lore" : clueTitle;
+            ShowPickupNotification($"★ {label} ({CurrentClues}/{totalCluesInLevel}) ★", new Color(1f, 0.9f, 0.25f, 1f), 2.5f);
+
             string info = string.IsNullOrEmpty(clueTitle) ? "" : $" (\"{clueTitle}\")";
             Debug.Log($"[Lore] ¡Pista de Lore recogida!{info} -> Progreso: {CurrentClues}/{totalCluesInLevel}");
 
@@ -55,30 +108,55 @@ namespace Armanya.Gameplay
             }
         }
 
-        // ---------- HUD de prueba rápido en pantalla ----------
+        void SyncKeyUI()
+        {
+            if (KeyUI.Instance != null)
+            {
+                KeyUI.Instance.SetCollectedCount(CurrentClues);
+            }
+        }
+
+        // ---------- HUD limpio en esquina superior derecha + aviso de recolección ----------
         void OnGUI()
         {
-            if (!showDebugHud) return;
-
-            // Caja de fondo
-            GUI.Box(new Rect(10, 68, 230, 60), "Armanya: Estado");
-
-            // Barra de vida
-            if (cachedPlayerHealth != null)
+            // 1. Puntaje discreto en la esquina superior derecha (justo debajo de los iconos de pistas)
+            if (showScoreHud)
             {
-                float hp = cachedPlayerHealth.CurrentHealth;
-                float max = cachedPlayerHealth.MaxHealth;
-                GUI.Label(new Rect(20, 88, 210, 20), $"HP: {hp:F0} / {max:F0}");
-            }
-            else
-            {
-                GUI.Label(new Rect(20, 88, 210, 20), "HP: (sin PlayerHealth)");
+                var scoreStyle = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 14,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleRight,
+                    normal = { textColor = new Color(1f, 0.95f, 0.65f, 1f) }
+                };
+                GUI.Box(new Rect(Screen.width - 195, 62, 180, 28), $"Puntaje: {CurrentScore} pts  ", scoreStyle);
             }
 
-            // Contador de pistas
-            string loreText = $"Pistas de Lore: {CurrentClues} / {totalCluesInLevel}";
-            if (CurrentClues >= totalCluesInLevel) loreText += " (¡COMPLETO!)";
-            GUI.Label(new Rect(20, 105, 210, 20), loreText);
+            // 2. Aviso visual llamativo al recoger vida, orbes o pistas
+            if (popupTimer > 0f && !string.IsNullOrEmpty(popupText))
+            {
+                float alpha = Mathf.Clamp01(popupTimer / Mathf.Min(0.6f, popupDuration));
+                float rise = (1f - Mathf.Clamp01(popupTimer / popupDuration)) * 28f;
+
+                var prevColor = GUI.color;
+                GUI.color = new Color(1f, 1f, 1f, alpha);
+
+                var boxStyle = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 20,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter,
+                    normal = { textColor = popupColor }
+                };
+
+                float w = 380f;
+                float h = 44f;
+                float x = (Screen.width - w) * 0.5f;
+                float y = 95f - rise;
+                GUI.Box(new Rect(x, y, w, h), popupText, boxStyle);
+
+                GUI.color = prevColor;
+            }
         }
     }
 }

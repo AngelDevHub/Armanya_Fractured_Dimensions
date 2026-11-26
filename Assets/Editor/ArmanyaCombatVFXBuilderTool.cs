@@ -189,6 +189,9 @@ namespace Armanya.EditorTools
                     EditorUtility.SetDirty(healthUI);
                 }
 
+                // Asegurar Blend Tree de animación + PlayerAnimatorBridge + CinemachineImpulseSource
+                ArmanyaPolishBuilderTool.WireHeroPolish(go);
+
                 wired++;
             }
 

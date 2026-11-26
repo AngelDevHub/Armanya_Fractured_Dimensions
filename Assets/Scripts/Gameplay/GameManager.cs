@@ -38,11 +38,13 @@ namespace Armanya.Gameplay
         [SerializeField] bool hasBitacoraHidrica;
         [SerializeField] bool hasManifiestoRoto;
         [SerializeField] bool hasConsolaCentral;
+        [SerializeField] int score;
 
         public HeroId SelectedHero => selectedHero;
         public bool HasBitacoraHidrica => hasBitacoraHidrica;
         public bool HasManifiestoRoto => hasManifiestoRoto;
         public bool HasConsolaCentral => hasConsolaCentral;
+        public int Score => score;
 
         public int CollectedCluesCount =>
             (hasBitacoraHidrica ? 1 : 0) +
@@ -52,6 +54,7 @@ namespace Armanya.Gameplay
         public bool AllCluesCollected => CollectedCluesCount >= 3;
 
         public event Action OnProgressChanged;
+        public event Action<int> OnScoreChanged;
 
         void Awake()
         {
@@ -130,13 +133,24 @@ namespace Armanya.Gameplay
 
         public void LoadMenu() => LoadSceneSafe(menuSceneName);
 
+        public void AddScore(int amount, string reason = "")
+        {
+            if (amount <= 0) return;
+            score += amount;
+            string detail = string.IsNullOrEmpty(reason) ? "" : $" ({reason})";
+            Debug.Log($"[Puntaje] +{amount} pts{detail} -> Total: {score}");
+            OnScoreChanged?.Invoke(score);
+        }
+
         public void ResetProgress()
         {
             hasBitacoraHidrica = false;
             hasManifiestoRoto = false;
             hasConsolaCentral = false;
-            Debug.Log("[GameManager] Progreso global reiniciado (0/3).");
+            score = 0;
+            Debug.Log("[GameManager] Progreso global y puntaje reiniciados (0/3, 0 pts).");
             OnProgressChanged?.Invoke();
+            OnScoreChanged?.Invoke(score);
         }
 
         void LoadSceneSafe(string sceneName)

@@ -60,7 +60,12 @@ namespace Armanya.Interactables
             if (healthSys != null)
             {
                 if (!onlyCollectIfDamaged || healthSys.CurrentHealth < healthSys.MaxHealth)
-                    healedAny |= healthSys.Heal(healAmount);
+                    healedAny |= healthSys.Heal(Mathf.Max(healAmount, 100));
+            }
+            else if (damageable != null && damageable.CurrentHealth < damageable.startingHealth)
+            {
+                damageable.GainHealth(1);
+                healedAny = true;
             }
 
             if (playerHealth != null)
@@ -69,15 +74,14 @@ namespace Armanya.Interactables
                     healedAny |= playerHealth.Heal(healAmount);
             }
 
-            if (damageable != null && damageable.CurrentHealth < damageable.startingHealth)
-            {
-                damageable.GainHealth(1);
-                healedAny = true;
-            }
-
             if (healedAny || !onlyCollectIfDamaged)
             {
                 consumed = true;
+                GameSession.AddPoints(50, "Orbe de Estabilidad");
+                GameSession.ShowPickupNotification(
+                    "+1 VIDA (Orbe de Estabilidad)",
+                    new Color(0.25f, 1f, 0.55f, 1f),
+                    2.0f);
                 Debug.Log($"[Orbe] Orbe de Estabilidad Dimensional consumido (+{healAmount} HP).", this);
                 Destroy(gameObject);
             }

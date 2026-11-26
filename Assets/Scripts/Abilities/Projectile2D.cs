@@ -10,6 +10,9 @@ namespace Armanya.Abilities
     [RequireComponent(typeof(Rigidbody2D))]
     public class Projectile2D : MonoBehaviour
     {
+        [Header("VFX de Impacto (2DGamekit)")]
+        [SerializeField] GameObject impactVfxPrefab;
+
         float damage;
         float knockback;
         float stunDuration;
@@ -19,6 +22,7 @@ namespace Armanya.Abilities
         LayerMask targets;
         GameObject owner;
         Vector2 moveDir;
+        Color activeTint = Color.white;
 
         public void Launch(
             Vector2 direction,
@@ -43,6 +47,7 @@ namespace Armanya.Abilities
             effectDuration = restDur;
             targets = targetLayers;
             owner = source;
+            activeTint = tint;
 
             // Teñir sprite y partículas del proyectil
             foreach (var sr in GetComponentsInChildren<SpriteRenderer>())
@@ -103,7 +108,24 @@ namespace Armanya.Abilities
 
             // Destruirse al impactar contra enemigos o paredes sólidas (no contra triggers de pistas/orbes)
             if (hitSomething || !other.isTrigger)
+            {
+                SpawnImpactVFX();
                 Destroy(gameObject);
+            }
+        }
+
+        void SpawnImpactVFX()
+        {
+            if (impactVfxPrefab == null) return;
+            var vfx = Instantiate(impactVfxPrefab, transform.position, Quaternion.identity);
+            foreach (var sr in vfx.GetComponentsInChildren<SpriteRenderer>(true))
+                sr.color = activeTint;
+            foreach (var ps in vfx.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                var main = ps.main;
+                main.startColor = activeTint;
+            }
+            Destroy(vfx, 1.5f);
         }
     }
 }

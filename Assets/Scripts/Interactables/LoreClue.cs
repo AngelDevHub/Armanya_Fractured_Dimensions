@@ -14,17 +14,32 @@ namespace Armanya.Interactables
         [TextArea(2, 4)]
         [SerializeField] string clueDescription = "Registro de la fractura dimensional de Armanya.";
 
-        [Header("Efecto de flotación suave")]
+        [Header("Efecto de flotación y visibilidad")]
         [SerializeField] bool floatAnimation = true;
         [SerializeField] float floatSpeed = 2.5f;
-        [SerializeField] float floatHeight = 0.15f;
+        [SerializeField] float floatHeight = 0.22f;
+        [Tooltip("Escala mínima para que la pista de lore siempre sea bien visible en pantalla.")]
+        [SerializeField] float minDisplayScale = 2.0f;
+        [SerializeField] float pulseAmplitude = 0.12f;
 
         Vector3 startPos;
+        Vector3 baseScale;
         bool collected;
 
         void Awake()
         {
             startPos = transform.position;
+
+            // Agrandar automáticamente si el sprite/objeto estaba demasiado pequeño
+            Vector3 s = transform.localScale;
+            if (Mathf.Abs(s.x) < minDisplayScale || Mathf.Abs(s.y) < minDisplayScale)
+            {
+                float sx = Mathf.Sign(s.x == 0f ? 1f : s.x) * Mathf.Max(Mathf.Abs(s.x), minDisplayScale);
+                float sy = Mathf.Sign(s.y == 0f ? 1f : s.y) * Mathf.Max(Mathf.Abs(s.y), minDisplayScale);
+                transform.localScale = new Vector3(sx, sy, s.z);
+            }
+            baseScale = transform.localScale;
+
             var col = GetComponent<Collider2D>();
             col.isTrigger = true;
         }
@@ -33,6 +48,8 @@ namespace Armanya.Interactables
         {
             if (!floatAnimation) return;
             transform.position = startPos + new Vector3(0f, Mathf.Sin(Time.time * floatSpeed) * floatHeight, 0f);
+            float pulse = 1f + Mathf.Sin(Time.time * (floatSpeed * 1.4f)) * pulseAmplitude;
+            transform.localScale = new Vector3(baseScale.x * pulse, baseScale.y * pulse, baseScale.z);
         }
 
         void OnTriggerEnter2D(Collider2D other)

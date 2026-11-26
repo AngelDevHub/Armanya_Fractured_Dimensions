@@ -22,11 +22,13 @@ namespace Armanya.Gameplay
         [Header("UI Barra de Vida (opcional)")]
         [SerializeField] Slider healthSlider;
 
-        [Header("Feedback de Daño (Parpadeo)")]
+        [Header("Feedback de Daño (Parpadeo y VFX 2DGamekit)")]
         [SerializeField] SpriteRenderer[] renderersToFlash;
         [SerializeField] Color damageFlashColor = new Color(1f, 0.25f, 0.25f, 1f);
         [SerializeField] float flashDuration = 0.12f;
         [SerializeField] int flashCount = 2;
+        [SerializeField] GameObject hitVfxPrefab;
+        [SerializeField] GameObject deathVfxPrefab;
 
         [Header("Estado de Aturdimiento (Stun)")]
         [SerializeField] Color stunTintColor = new Color(0.75f, 0.85f, 1f, 1f);
@@ -97,6 +99,12 @@ namespace Armanya.Gameplay
             UpdateSlider();
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
             TriggerDamageFlash();
+            SpawnVFX(hitVfxPrefab, 1.5f);
+
+            // Game Feel: Camera Shake ante impactos (más intenso si golpean al jugador)
+            Armanya.CameraSystem.CameraFollow2D.Shake(
+                destroyOnDeath ? 0.10f : 0.28f,
+                destroyOnDeath ? 0.12f : 0.22f);
 
             if (currentHealth <= 0)
                 Die();
@@ -108,7 +116,20 @@ namespace Armanya.Gameplay
             TakeDamage(Mathf.RoundToInt(amount));
         }
 
-        /// <summary>Cura vida respetando el máximo.</summary>
+        /// <summary>Reconfigura la vida máxima en ejecución (ej. 5 corazones x 100 HP = 500 HP).</summary>
+        public void ConfigureMaxHealth(int newMaxHealth, bool refill = true)
+        {
+            maxHealth = Mathf.Max(1, newMaxHealth);
+            if (refill)
+                currentHealth = maxHealth;
+            else
+                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+            UpdateSlider();
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
+
+        /// <summary>Cura vida respetando el máximo y dispara destello verde visible.</summary>
         public bool Heal(int amount)
         {
             if (IsDead || amount <= 0) return false;
@@ -120,7 +141,27 @@ namespace Armanya.Gameplay
 
             UpdateSlider();
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            TriggerHealFlash();
             return true;
+        }
+
+        void TriggerHealFlash()
+        {
+            if (!gameObject.activeInHierarchy || renderersToFlash == null || renderersToFlash.Length == 0) return;
+            if (flashRoutine != null) StopCoroutine(flashRoutine);
+            flashRoutine = StartCoroutine(ColorFlashCoroutine(new Color(0.25f, 1f, 0.45f, 1f), 3, 0.10f));
+        }
+
+        IEnumerator ColorFlashCoroutine(Color color, int count, float duration)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                SetRenderersColor(color);
+                yield return new WaitForSeconds(duration);
+                RestoreOriginalColors();
+                yield return new WaitForSeconds(duration * 0.5f);
+            }
+            flashRoutine = null;
         }
 
         /// <summary>Aplica aturdimiento temporal (ej. poderes K de 2.5s o 3.0s).</summary>
@@ -153,7 +194,15 @@ namespace Armanya.Gameplay
             IsDead = true;
             Debug.Log($"[{name}] Ha sido derrotado.", this);
 
+            // Otorgar puntaje al derrotar enemigos o jefes (los jugadores tienen destroyOnDeath = false)
+            if (destroyOnDeath)
+            {
+                int reward = name.ToLowerInvariant().Contains("ankea") ? 1000 : 100;
+                GameSession.AddPoints(reward, $"Derrotar a {name}");
+            }
+
             TryDropStabilityOrb();
+            SpawnVFX(deathVfxPrefab, 2.0f);
 
             OnDeath?.Invoke();
             onDeathEvent?.Invoke();
@@ -172,6 +221,13 @@ namespace Armanya.Gameplay
                 Instantiate(stabilityOrbPrefab, transform.position + Vector3.up * 0.3f, Quaternion.identity);
                 Debug.Log($"[{name}] ¡Soltó un Orbe de Estabilidad Dimensional (+15 HP)!", this);
             }
+        }
+
+        void SpawnVFX(GameObject prefab, float lifetime)
+        {
+            if (prefab == null) return;
+            var vfx = Instantiate(prefab, transform.position + Vector3.up * 0.3f, Quaternion.identity);
+            Destroy(vfx, lifetime);
         }
 
         void UpdateSlider()

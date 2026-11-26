@@ -63,7 +63,14 @@ namespace Armanya.Gameplay
             bool advance = kb.spaceKey.wasPressedThisFrame ||
                            kb.enterKey.wasPressedThisFrame ||
                            kb.eKey.wasPressedThisFrame ||
+                           kb.escapeKey.wasPressedThisFrame ||
                            (mouse != null && mouse.leftButton.wasPressedThisFrame);
+
+            if (kb.escapeKey.wasPressedThisFrame)
+            {
+                isShowing = false;
+                return;
+            }
 
             if (advance)
             {

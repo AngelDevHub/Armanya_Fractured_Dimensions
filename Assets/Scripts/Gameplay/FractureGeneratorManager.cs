@@ -43,6 +43,7 @@ namespace Armanya.Gameplay
         void HandleRepaired(FractureGenerator g)
         {
             Recount();
+            GameSession.AddPoints(300, "Generador de Fractura reparado");
             Debug.Log($"[Fractura] Generadores reparados: {RepairedCount}/{TotalCount}");
             OnProgress?.Invoke(RepairedCount, TotalCount);
 

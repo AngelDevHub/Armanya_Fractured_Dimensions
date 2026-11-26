@@ -25,7 +25,7 @@ MonoBehaviour:
   stunDuration: 0
   dashDuration: 0
   dashSpeed: 0
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 8111100428020903263, guid: f030f47d79e84d541b6375f1920287d8, type: 3}
   projectileSpeed: 0
   projectileLifetime: 2
   vfxPrefab: {fileID: 3539363324055420897, guid: 10feaf068a0a26d4488a859a511edbcc, type: 3}

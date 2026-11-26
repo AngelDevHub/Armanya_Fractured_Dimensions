@@ -490,6 +490,8 @@ MonoBehaviour:
   damageFlashColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   flashDuration: 0.12
   flashCount: 2
+  hitVfxPrefab: {fileID: 1618430331360934, guid: 8b019aae9fde32e41aa6181013f53be2, type: 3}
+  deathVfxPrefab: {fileID: 1385443307219604, guid: 61a6972b233f54246b0d0c15eabfb857, type: 3}
   stunTintColor: {r: 0.75, g: 0.85, b: 1, a: 1}
   destroyOnDeath: 1
   dropOrbOnDeath: 1
@@ -526,3 +528,5 @@ MonoBehaviour:
   attackDamage: 18
   attackCooldown: 1.5
   spriteFacesRightByDefault: 1
+  useNavMeshIfAvailable: 1
+  perceptionInterval: 0.2

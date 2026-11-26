@@ -34,13 +34,21 @@ namespace Gamekit2D
             {
                 if (damageable != null && canHealDamageable)
                 {
+                    // ArmanyaPlayerHealthBridge sincroniza automáticamente +100 HP por corazón en HealthSystem
                     damageable.GainHealth(Mathf.Min(healthAmount, damageable.startingHealth - damageable.CurrentHealth));
                 }
-
-                if (healthSys != null && canHealHealthSys)
+                else if (healthSys != null && canHealHealthSys)
                 {
-                    healthSys.Heal(healthAmount * 20);
+                    // Si el corazón actual solo estaba parcialmente dañado, rellenarlo al 100%
+                    healthSys.Heal(healthAmount * 100);
                 }
+
+                // Feedback visual llamativo al recoger vida
+                Armanya.Gameplay.GameSession.ShowPickupNotification(
+                    $"+{healthAmount} VIDA RESTAURADA (100%)",
+                    new Color(0.25f, 1f, 0.45f, 1f),
+                    2.2f);
+                Armanya.Gameplay.GameSession.AddPoints(50, "Cristal de Vida");
 
                 var col = GetComponent<Collider2D>();
                 if (col != null) col.enabled = false;

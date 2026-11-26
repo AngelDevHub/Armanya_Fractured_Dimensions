@@ -17,6 +17,10 @@ namespace Armanya.Enemies
         [SerializeField] float speed = 8f;
         [SerializeField] float lifetime = 4f;
 
+        [Header("Visual y VFX de Impacto (2DGamekit)")]
+        [SerializeField] Color projectileTint = Color.white;
+        [SerializeField] GameObject impactVfxPrefab;
+
         GameObject owner;
         Rigidbody2D rb;
 
@@ -26,6 +30,36 @@ namespace Armanya.Enemies
             rb.gravityScale = 0f;
             var col = GetComponent<Collider2D>();
             col.isTrigger = true;
+            ApplyTint(projectileTint);
+        }
+
+        void ApplyTint(Color tint)
+        {
+            if (tint == Color.white) return;
+            foreach (var sr in GetComponentsInChildren<SpriteRenderer>(true))
+                sr.color = tint;
+            foreach (var ps in GetComponentsInChildren<ParticleSystem>(true))
+            {
+                var main = ps.main;
+                main.startColor = tint;
+            }
+        }
+
+        void SpawnImpactVFX()
+        {
+            if (impactVfxPrefab == null) return;
+            var vfx = Instantiate(impactVfxPrefab, transform.position, Quaternion.identity);
+            if (projectileTint != Color.white)
+            {
+                foreach (var sr in vfx.GetComponentsInChildren<SpriteRenderer>(true))
+                    sr.color = projectileTint;
+                foreach (var ps in vfx.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    var main = ps.main;
+                    main.startColor = projectileTint;
+                }
+            }
+            Destroy(vfx, 1.5f);
         }
 
         public void Launch(Vector2 direction, int customDamage, float customSpeed, GameObject source)
@@ -53,6 +87,7 @@ namespace Armanya.Enemies
             if (other.GetComponent<KineticShield2D>() != null || other.GetComponentInParent<KineticShield2D>() != null)
             {
                 Debug.Log($"[{name}] ¡Proyectil enemigo bloqueado por el Escudo Cinético de Aleek!", this);
+                SpawnImpactVFX();
                 Destroy(gameObject);
                 return;
             }
@@ -74,13 +109,17 @@ namespace Armanya.Enemies
                 var ph = playerCtrl.GetComponent<PlayerHealth>();
                 if (ph != null) ph.TakeDamage(damage, owner);
 
+                SpawnImpactVFX();
                 Destroy(gameObject);
                 return;
             }
 
             // Destruirse al chocar con paredes o suelo sólido (ignorar triggers de enemigos/pistas)
             if (!other.isTrigger && !other.CompareTag("Enemy"))
+            {
+                SpawnImpactVFX();
                 Destroy(gameObject);
+            }
         }
     }
 }

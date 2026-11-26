@@ -328,10 +328,13 @@ namespace Armanya.EditorTools
                     var sr = c.GetComponent<SpriteRenderer>();
                     if (sr == null) continue;
                     Undo.RecordObject(sr, "Cambiar Icono Pista de Lore");
+                    Undo.RecordObject(c.transform, "Agrandar Pista de Lore");
                     sr.sprite = loreSprite;
                     sr.color = Color.white;
                     sr.sortingLayerName = CharacterSortingLayer;
-                    sr.sortingOrder = 8;
+                    sr.sortingOrder = 10;
+                    if (Mathf.Abs(c.transform.localScale.x) < 2.0f)
+                        c.transform.localScale = new Vector3(2.0f, 2.0f, 1f);
                     EditorUtility.SetDirty(sr);
                     updated++;
                 }
