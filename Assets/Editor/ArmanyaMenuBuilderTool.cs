@@ -30,7 +30,7 @@ namespace Armanya.EditorTools
             "Assets/Scenes/Biomes/Level4_RuinasFinales.unity"
         };
 
-        [MenuItem("Armanya/5. Crear Escena Menu_Inicio y Ordenar Build Settings")]
+        // [MenuItem("Armanya/5. Crear Escena Menu_Inicio y Ordenar Build Settings")]
         public static void BuildMenuSceneAndSettings()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -123,7 +123,7 @@ namespace Armanya.EditorTools
             Debug.Log("[Armanya] ¡Escena 'Menu_Inicio' creada y Build Settings ordenado (0..4)!");
         }
 
-        [MenuItem("Armanya/6. Solo Ordenar Build Settings (Menu + 4 Niveles)")]
+        [MenuItem("Armanya/3. Actualizar Build Settings (Menú + 4 Niveles)")]
         public static void ConfigureBuildSettings()
         {
             var list = new List<EditorBuildSettingsScene>();

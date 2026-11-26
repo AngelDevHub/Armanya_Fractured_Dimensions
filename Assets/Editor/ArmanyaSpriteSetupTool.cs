@@ -40,7 +40,7 @@ namespace Armanya.EditorTools
             { "CentinelaTentacular_Side", 1.75f }
         };
 
-        [MenuItem("Armanya/1. Configurar Sprites 2D (Import Settings)")]
+        // [MenuItem("Armanya/1. Configurar Sprites 2D (Import Settings)")]
         public static void ConfigureAllSprites()
         {
             int count = 0;
@@ -102,7 +102,7 @@ namespace Armanya.EditorTools
             return count;
         }
 
-        [MenuItem("Armanya/2. Asignar Sprites a Personajes en Escena Actual")]
+        // [MenuItem("Armanya/2. Asignar Sprites a Personajes en Escena Actual")]
         public static void AssignSpritesInActiveScene()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -208,7 +208,7 @@ namespace Armanya.EditorTools
             return null;
         }
 
-        [MenuItem("Armanya/3. Crear Prefabs Base de Monstruos")]
+        // [MenuItem("Armanya/3. Crear Prefabs Base de Monstruos")]
         public static void CreateMonsterPrefabs()
         {
             if (!Directory.Exists(MonsterPrefabsFolder))
@@ -257,7 +257,7 @@ namespace Armanya.EditorTools
             Debug.Log($"[Armanya] Se crearon {created} prefabs de monstruos en '{MonsterPrefabsFolder}'.");
         }
 
-        [MenuItem("Armanya/4. Restaurar Cuadro (Square) en Generadores")]
+        // [MenuItem("Armanya/4. Restaurar Cuadro (Square) en Generadores")]
         public static void RestoreGeneratorSquares()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -297,7 +297,7 @@ namespace Armanya.EditorTools
             }
         }
 
-        [MenuItem("Armanya/11. Cambiar Iconos de Pistas de Lore y Orbes (2DGamekit)")]
+        // [MenuItem("Armanya/11. Cambiar Iconos de Pistas de Lore y Orbes (2DGamekit)")]
         public static void Apply2DGamekitPickupSprites()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -380,7 +380,7 @@ namespace Armanya.EditorTools
             }
         }
 
-        [MenuItem("Armanya/12. Cambiar Sprites a Pilares y Generadores + Eliminar Cubo Dummy")]
+        // [MenuItem("Armanya/12. Cambiar Sprites a Pilares y Generadores + Eliminar Cubo Dummy")]
         public static void ApplyPillarAndGeneratorSprites()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -534,7 +534,7 @@ namespace Armanya.EditorTools
             Debug.Log($"[Armanya] ¡Listo! Se actualizaron {genCount} Generadores (Switch_0/1) y {pillarCount} Pilares Dimensionales (AlienSculpture01), y se eliminó el cubo Dummy. Guarda (Ctrl+S).");
         }
 
-        [MenuItem("Armanya/13. Configurar Dialogos de Historia en Escena Actual")]
+        // [MenuItem("Armanya/13. Configurar Dialogos de Historia en Escena Actual")]
         public static void SetupStoryDialoguesInScene()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -628,7 +628,7 @@ namespace Armanya.EditorTools
             elem.FindPropertyRelative("message").stringValue = message;
         }
 
-        [MenuItem("Armanya/14. Crear Portal a Sub-Zona (Explorar con Tecla S)")]
+        // [MenuItem("Armanya/14. Crear Portal a Sub-Zona (Explorar con Tecla S)")]
         public static void CreateSubzonePortalInScene()
         {
             var scene = EditorSceneManager.GetActiveScene();

@@ -27,7 +27,7 @@ namespace Armanya.EditorTools
         static readonly Color LightningAngus = new Color(0.45f, 0.92f, 1f, 0.92f);
         static readonly Color VioletAnya = new Color(0.75f, 0.25f, 1f, 0.9f);
 
-        [MenuItem("Armanya/7. Generar VFX de Combate (J/K), Habilidades y Monstruos")]
+        // [MenuItem("Armanya/7. Generar VFX de Combate (J/K), Habilidades y Monstruos")]
         public static void BuildCombatVfxAndData()
         {
             Directory.CreateDirectory(VfxFolder);
@@ -98,7 +98,7 @@ namespace Armanya.EditorTools
             Debug.Log("[Armanya] ¡VFX, 6 AbilityData (Aleek/Angus/Anya), Orbe y Prefabs de Monstruos actualizados!");
         }
 
-        [MenuItem("Armanya/8. Conectar FirePoint, J/K y HealthSystem en Escena Actual")]
+        // [MenuItem("Armanya/8. Conectar FirePoint, J/K y HealthSystem en Escena Actual")]
         public static void WireSceneHeroesAndMonsters()
         {
             var scene = EditorSceneManager.GetActiveScene();
@@ -162,13 +162,40 @@ namespace Armanya.EditorTools
                     hso.ApplyModifiedPropertiesWithoutUndo();
                 }
 
+                // Asegurar Damageable de 2D Gamekit en el jugador
+                var dmg = go.GetComponent<Gamekit2D.Damageable>();
+                if (dmg == null)
+                {
+                    dmg = Undo.AddComponent<Gamekit2D.Damageable>(go);
+                    dmg.startingHealth = 5;
+                    dmg.invulnerableAfterDamage = true;
+                    dmg.invulnerabilityDuration = 1.0f;
+                    dmg.disableOnDeath = false;
+                }
+
+                // Asegurar ArmanyaPlayerHealthBridge (Game Over + sincronización de corazones)
+                var bridge = go.GetComponent<ArmanyaPlayerHealthBridge>();
+                if (bridge == null)
+                {
+                    bridge = Undo.AddComponent<ArmanyaPlayerHealthBridge>(go);
+                }
+
+                // Conectar HealthUI de la escena (HealthCanvas) con el Damageable del jugador
+                var healthUI = Object.FindFirstObjectByType<Gamekit2D.HealthUI>();
+                if (healthUI != null && dmg != null)
+                {
+                    Undo.RecordObject(healthUI, "Asignar Damageable a HealthUI");
+                    healthUI.representedDamageable = dmg;
+                    EditorUtility.SetDirty(healthUI);
+                }
+
                 wired++;
             }
 
             if (wired > 0)
             {
                 EditorSceneManager.MarkSceneDirty(scene);
-                Debug.Log($"[Armanya] Conectados FirePoint, J/K y HealthSystem en {wired} héroe(s) de '{scene.name}'. Guarda (Ctrl+S).");
+                Debug.Log($"[Armanya] Conectados FirePoint, J/K, HealthSystem, Damageable y GameOver en {wired} héroe(s) de '{scene.name}'. Guarda (Ctrl+S).");
             }
             else
             {

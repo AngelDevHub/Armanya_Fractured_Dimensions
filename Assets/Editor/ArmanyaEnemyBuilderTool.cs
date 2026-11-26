@@ -22,7 +22,7 @@ namespace Armanya.EditorTools
         const string PickupOrbPath = "Assets/Prefabs/Pickups/StabilityOrb.prefab";
         const string AleekDomePath = "Assets/Prefabs/VFX/VFX_Aleek_KineticDome.prefab";
 
-        [MenuItem("Armanya/9. Armar Prefabs de Enemigos (IA, Barra Vida, Proyectiles y Ankea)")]
+        // [MenuItem("Armanya/9. Armar Prefabs de Enemigos (IA, Barra Vida, Proyectiles y Ankea)")]
         public static void BuildAllEnemyPrefabs()
         {
             Directory.CreateDirectory(MonstersFolder);
@@ -74,7 +74,7 @@ namespace Armanya.EditorTools
             Debug.Log("[Armanya] ¡Listos los 4 prefabs de enemigos (con IA + barra de vida), proyectiles, Escudo Cinético de Aleek y Ankea!");
         }
 
-        [MenuItem("Armanya/10. Poblar Enemigos del Bioma en Escena Actual")]
+        // [MenuItem("Armanya/10. Poblar Enemigos del Bioma en Escena Actual")]
         public static void PopulateEnemiesForCurrentBiome()
         {
             var scene = EditorSceneManager.GetActiveScene();

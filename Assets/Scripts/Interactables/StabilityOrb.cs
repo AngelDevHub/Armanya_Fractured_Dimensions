@@ -39,15 +39,21 @@ namespace Armanya.Interactables
         {
             if (consumed) return;
 
-            // Solo el jugador puede recoger orbes
-            if (other.GetComponent<PlayerController2D>() == null && other.GetComponentInParent<PlayerController2D>() == null)
-                return;
+            // Detectar jugador por PlayerController2D, PlayerCharacter, AbilityUser o Tag Player
+            bool isPlayer = other.GetComponent<PlayerController2D>() != null ||
+                            other.GetComponentInParent<PlayerController2D>() != null ||
+                            other.GetComponent<Gamekit2D.PlayerCharacter>() != null ||
+                            other.GetComponentInParent<Gamekit2D.PlayerCharacter>() != null ||
+                            other.GetComponent<Armanya.Abilities.AbilityUser>() != null ||
+                            other.GetComponentInParent<Armanya.Abilities.AbilityUser>() != null ||
+                            other.CompareTag("Player");
+
+            if (!isPlayer) return;
 
             // 1. Intentar curar HealthSystem (nuevo sistema unificado)
-            var healthSys = other.GetComponent<HealthSystem>();
-            if (healthSys == null) healthSys = other.GetComponentInParent<HealthSystem>();
-            var playerHealth = other.GetComponent<PlayerHealth>();
-            if (playerHealth == null) playerHealth = other.GetComponentInParent<PlayerHealth>();
+            var healthSys = other.GetComponent<HealthSystem>() ?? other.GetComponentInParent<HealthSystem>();
+            var playerHealth = other.GetComponent<PlayerHealth>() ?? other.GetComponentInParent<PlayerHealth>();
+            var damageable = other.GetComponent<Gamekit2D.Damageable>() ?? other.GetComponentInParent<Gamekit2D.Damageable>();
 
             bool healedAny = false;
 
@@ -63,7 +69,13 @@ namespace Armanya.Interactables
                     healedAny |= playerHealth.Heal(healAmount);
             }
 
-            if (healedAny)
+            if (damageable != null && damageable.CurrentHealth < damageable.startingHealth)
+            {
+                damageable.GainHealth(1);
+                healedAny = true;
+            }
+
+            if (healedAny || !onlyCollectIfDamaged)
             {
                 consumed = true;
                 Debug.Log($"[Orbe] Orbe de Estabilidad Dimensional consumido (+{healAmount} HP).", this);
