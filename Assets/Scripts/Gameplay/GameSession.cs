@@ -75,7 +75,26 @@ namespace Armanya.Gameplay
         void Start()
         {
             cachedPlayerHealth = FindFirstObjectByType<Player.PlayerHealth>();
+            EnsureCameraFollowsPlayer();
             SyncKeyUI();
+        }
+
+        void EnsureCameraFollowsPlayer()
+        {
+            Camera cam = Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>();
+            if (cam == null) return;
+
+            var follow = cam.GetComponent<CameraSystem.CameraFollow2D>();
+            if (follow == null)
+            {
+                follow = cam.gameObject.AddComponent<CameraSystem.CameraFollow2D>();
+            }
+
+            var player = FindFirstObjectByType<Player.PlayerController2D>();
+            if (player != null)
+            {
+                follow.SetTarget(player.transform);
+            }
         }
 
         void Update()

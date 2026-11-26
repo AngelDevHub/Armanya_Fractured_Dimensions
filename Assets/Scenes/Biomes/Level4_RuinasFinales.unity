@@ -3403,6 +3403,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2575988137194010590, guid: 468fe742d9332d04ba201d54e0ebdb61, type: 3}
+      propertyPath: generatorManager
+      value: 
+      objectReference: {fileID: 1784376087}
     - target: {fileID: 5766096551679847983, guid: 468fe742d9332d04ba201d54e0ebdb61, type: 3}
       propertyPath: m_LocalPosition.x
       value: 9
@@ -3964,7 +3968,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -42980,12 +42984,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Armanya.Interactables.RestorableObject
   isRestored: 0
   requiredEffect: 0
+  restorationMessage: "\xA1Entorno Restaurado!"
+  bonusPoints: 150
   targetRenderer: {fileID: 1047563176}
   damagedColor: {r: 0.5, g: 0.3, b: 0.7, a: 1}
   restoredColor: {r: 0.3, g: 1, b: 1, a: 1}
   damagedVisual: {fileID: 0}
   restoredVisual: {fileID: 0}
   solidColliderWhenRestored: {fileID: 0}
+  disableOnRestore: []
+  enableOnRestore: []
 --- !u!61 &1047563175
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -44508,7 +44516,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -45177,7 +45185,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -47404,7 +47412,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -52426,7 +52434,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -52770,7 +52778,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

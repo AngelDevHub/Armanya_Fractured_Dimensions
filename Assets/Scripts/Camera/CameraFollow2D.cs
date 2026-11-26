@@ -32,12 +32,18 @@ namespace Armanya.CameraSystem
         float shakeIntensity;
         Vector3 lastShakeOffset;
         CinemachineImpulseSource impulseSource;
+        float nextTargetScanTime;
 
         void Awake()
         {
             Instance = this;
             fixedZ = transform.position.z;
             impulseSource = GetComponent<CinemachineImpulseSource>();
+
+            // Si la escena heredada de 2DGamekit tiene un CinemachineBrain apuntando a un confiner/target viejo,
+            // lo desactivamos para que CameraFollow2D siga libremente a los héroes de Armanya.
+            var brain = GetComponent<CinemachineBrain>();
+            if (brain != null) brain.enabled = false;
 
             if (confinerCollider != null)
             {
@@ -55,12 +61,18 @@ namespace Armanya.CameraSystem
 
         void Start()
         {
+            TryFindPlayerTarget();
             // Empieza ya sobre el jugador para evitar un "barrido" inicial.
             if (target != null) transform.position = Desired();
         }
 
         void LateUpdate()
         {
+            if ((target == null || !target.gameObject.activeInHierarchy) && Time.time >= nextTargetScanTime)
+            {
+                nextTargetScanTime = Time.time + 0.25f;
+                TryFindPlayerTarget();
+            }
             if (target == null) return;
 
             // Quitar el desplazamiento de shake del frame anterior antes de suavizar
@@ -119,6 +131,12 @@ namespace Armanya.CameraSystem
         }
 
         public void SetTarget(Transform newTarget) => target = newTarget;
+
+        void TryFindPlayerTarget()
+        {
+            var pc = FindFirstObjectByType<Armanya.Player.PlayerController2D>();
+            if (pc != null) target = pc.transform;
+        }
 
         void OnDrawGizmosSelected()
         {

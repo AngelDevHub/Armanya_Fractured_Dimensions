@@ -35,6 +35,9 @@ namespace Armanya.Enemies
         float nextOrbTime;
         float nextColumnTime;
         bool neutralized;
+        Transform cachedPlayer;
+        float nextPlayerScanTime;
+        GUIStyle victoryBoxStyle;
 
         void Start()
         {
@@ -61,11 +64,17 @@ namespace Armanya.Enemies
             // Flotación de jefe
             transform.position = startPos + new Vector3(0f, Mathf.Sin(Time.time * hoverSpeed) * hoverAmplitude, 0f);
 
-            var player = FindFirstObjectByType<PlayerController2D>();
-            if (player == null) return;
+            // Cacheo eficiente del jugador (evita FindFirstObjectByType cada frame para AU 4.1 Profiler)
+            if (cachedPlayer == null || !cachedPlayer.gameObject.activeInHierarchy || Time.time >= nextPlayerScanTime)
+            {
+                nextPlayerScanTime = Time.time + 0.3f;
+                var pc = FindFirstObjectByType<PlayerController2D>();
+                cachedPlayer = pc != null ? pc.transform : null;
+            }
+            if (cachedPlayer == null) return;
 
             // Mirar hacia el jugador
-            float dx = player.transform.position.x - transform.position.x;
+            float dx = cachedPlayer.position.x - transform.position.x;
             Vector3 s = transform.localScale;
             s.x = Mathf.Abs(s.x) * (dx >= 0f ? 1f : -1f);
             transform.localScale = s;
@@ -75,7 +84,7 @@ namespace Armanya.Enemies
             {
                 nextOrbTime = Time.time + orbInterval;
                 Vector3 origin = firePoint != null ? firePoint.position : transform.position;
-                Vector2 dir = (player.transform.position - origin).normalized;
+                Vector2 dir = (cachedPlayer.position - origin).normalized;
 
                 var orb = Instantiate(thermalOrbPrefab, origin, Quaternion.identity);
                 orb.Launch(dir, thermalOrbDamage, thermalOrbSpeed, gameObject);
@@ -85,9 +94,39 @@ namespace Armanya.Enemies
             if (Time.time >= nextColumnTime && fireColumnPrefab != null)
             {
                 nextColumnTime = Time.time + fireColumnInterval;
-                Vector3 spawnAt = new Vector3(player.transform.position.x, player.transform.position.y + 0.5f, 0f);
+                Vector3 spawnAt = new Vector3(cachedPlayer.position.x, cachedPlayer.position.y + 0.5f, 0f);
                 Instantiate(fireColumnPrefab, spawnAt, Quaternion.identity);
             }
+        }
+
+        void OnGUI()
+        {
+            if (!neutralized) return;
+
+            if (victoryBoxStyle == null)
+            {
+                victoryBoxStyle = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 19,
+                    fontStyle = FontStyle.Bold,
+                    wordWrap = true,
+                    alignment = TextAnchor.MiddleCenter,
+                    padding = new RectOffset(20, 20, 16, 16)
+                };
+                victoryBoxStyle.normal.textColor = new Color(0.75f, 1f, 0.9f, 1f);
+            }
+
+            float w = Mathf.Min(640f, Screen.width - 40f);
+            float h = 155f;
+            Rect r = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.25f, w, h);
+            GUI.Box(
+                r,
+                "★ BRECHA ESTABILIZADA — ARMANYA HA DESPERTADO ★\n\n" +
+                "Los 3 Generadores de Fractura han sido reparados.\n" +
+                "Angus, Anya y Aleek demostraron que ninguna crisis se supera con apatía ni violencia,\n" +
+                "sino con empatía colectiva y responsabilidad compartida.",
+                victoryBoxStyle
+            );
         }
 
         bool AreAllGeneratorsRepaired()

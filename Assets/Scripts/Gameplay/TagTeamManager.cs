@@ -43,6 +43,9 @@ namespace Armanya.Gameplay
 
         void Start()
         {
+            if (cameraFollow == null)
+                cameraFollow = FindFirstObjectByType<CameraSystem.CameraFollow2D>();
+
             if (!HasAnyHero())
             {
                 Debug.LogError("[TagTeam] No hay héroes asignados en el TagTeamManager.", this);
@@ -107,6 +110,10 @@ namespace Armanya.Gameplay
             if (GameSession.Instance != null)
                 GameSession.Instance.SetPlayerHealth(next.GetComponent<PlayerHealth>());
 
+            // Sincronizar corazones HUD (2D Gamekit HealthUI)
+            var nextBridge = next.GetComponent<ArmanyaPlayerHealthBridge>();
+            if (nextBridge != null) nextBridge.ConnectUI();
+
             Debug.Log($"[TagTeam] Héroe activo: {heroes[index].heroName} (tecla {index + 1})", this);
             OnHeroChanged?.Invoke(index, heroes[index].heroName);
         }
@@ -121,11 +128,45 @@ namespace Armanya.Gameplay
             return -1;
         }
 
+        GUIStyle tagBoxActive;
+        GUIStyle tagBoxInactive;
+
         void OnGUI()
         {
             if (!showDebugHud || CurrentIndex < 0) return;
-            string label = $"Héroe: {heroes[CurrentIndex].heroName}   [1] [2] [3]";
-            GUI.Label(new Rect(10, 140, 400, 24), label);
+
+            if (tagBoxActive == null)
+            {
+                tagBoxActive = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 15,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter
+                };
+                tagBoxActive.normal.textColor = new Color(0.2f, 1f, 0.95f, 1f);
+
+                tagBoxInactive = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 13,
+                    alignment = TextAnchor.MiddleCenter
+                };
+                tagBoxInactive.normal.textColor = new Color(0.75f, 0.75f, 0.75f, 0.85f);
+            }
+
+            float slotW = 135f;
+            float slotH = 34f;
+            float gap = 10f;
+            float totalW = (slotW * heroes.Length) + (gap * (heroes.Length - 1));
+            float startX = (Screen.width - totalW) * 0.5f;
+            float y = Screen.height - 52f;
+
+            for (int i = 0; i < heroes.Length; i++)
+            {
+                if (!IsValid(i)) continue;
+                bool active = (i == CurrentIndex);
+                string text = $"[{i + 1}] {heroes[i].heroName.ToUpper()}";
+                GUI.Box(new Rect(startX + i * (slotW + gap), y, slotW, slotH), text, active ? tagBoxActive : tagBoxInactive);
+            }
         }
     }
 }
