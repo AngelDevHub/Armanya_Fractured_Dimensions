@@ -76,6 +76,7 @@ namespace Armanya.Gameplay
         {
             cachedPlayerHealth = FindFirstObjectByType<Player.PlayerHealth>();
             EnsureCameraFollowsPlayer();
+            DisableLegacyEllenDialogues();
             SyncKeyUI();
         }
 
@@ -94,6 +95,50 @@ namespace Armanya.Gameplay
             if (player != null)
             {
                 follow.SetTarget(player.transform);
+            }
+
+            // Garantizar que siempre exista exactamente 1 AudioListener activo en la escena
+            var listeners = FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+            AudioListener activeListener = null;
+            foreach (var l in listeners)
+            {
+                if (l == null) continue;
+                if (activeListener == null && l.enabled && l.gameObject.activeInHierarchy)
+                {
+                    activeListener = l;
+                }
+                else if (l != activeListener)
+                {
+                    l.enabled = false;
+                }
+            }
+
+            if (activeListener == null)
+            {
+                var camListener = cam.GetComponent<AudioListener>();
+                if (camListener == null) camListener = cam.gameObject.AddComponent<AudioListener>();
+                camListener.enabled = true;
+            }
+        }
+
+        void DisableLegacyEllenDialogues()
+        {
+            // Apagar definitivamente todos los cuadros de diálogo viejos de Ellen (2DGamekit)
+            var oldDialogs = FindObjectsByType<DialogueCanvasController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var d in oldDialogs)
+            {
+                if (d != null) d.gameObject.SetActive(false);
+            }
+
+            // Apagar todos los InfoPost heredados de 2DGamekit para que no vuelvan a abrir mensajes de Ellen al pasar
+            var interactables = FindObjectsByType<InteractOnTrigger2D>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var trigger in interactables)
+            {
+                if (trigger == null) continue;
+                if (trigger.gameObject.name.IndexOf("InfoPost", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    trigger.gameObject.SetActive(false);
+                }
             }
         }
 

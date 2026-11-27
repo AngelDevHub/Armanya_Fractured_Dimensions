@@ -45,6 +45,24 @@ namespace Gamekit2D
 
         void Start()
         {
+            // Desactivar triggers heredados de 2DGamekit (ej. TransitionStartToZone2 en Nivel 3)
+            // que regresan al jugador por accidente a un nivel anterior al caminar.
+            // En Armanya los cambios de nivel se hacen con Armanya_DimensionPortal.
+            if (transitionType != TransitionType.SameScene && transitionWhen == TransitionWhen.OnTriggerEnter)
+            {
+                string objName = gameObject.name.ToLowerInvariant();
+                string rawDest = (newSceneName ?? "").ToLowerInvariant();
+                if (objName.Contains("tozone") || rawDest.Contains("zone") ||
+                    Object.FindFirstObjectByType<Armanya.Interactables.ArmanyaPortalController>() != null)
+                {
+                    Debug.Log($"[TransitionPoint] Trigger heredado '{gameObject.name}' desactivado para evitar regreso accidental de nivel.");
+                    enabled = false;
+                    var col = GetComponent<Collider2D>();
+                    if (col != null) col.enabled = false;
+                    return;
+                }
+            }
+
             if (transitionWhen == TransitionWhen.ExternalCall)
                 m_TransitioningGameObjectPresent = true;
         }

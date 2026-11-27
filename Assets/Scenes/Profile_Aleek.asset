@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Profile_Aleek
   m_EditorClassIdentifier: Assembly-CSharp::Armanya.Player.CharacterProfile
   characterName: Aleek
-  moveSpeed: 6.5
-  jumpForce: 11.5
+  moveSpeed: 7.5
+  jumpForce: 13.2
   acceleration: 55
   deceleration: 75
   coyoteTime: 0.1

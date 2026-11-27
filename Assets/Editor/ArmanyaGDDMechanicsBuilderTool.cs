@@ -344,6 +344,52 @@ namespace Armanya.EditorTools
             );
         }
 
+        [MenuItem("Armanya/GDD 100%/Desbloquear Puertas Viejas 2DGamekit (Escena Actual)", false, 216)]
+        public static void UnlockLegacy2DGamekitDoors()
+        {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Modo Play activo", "Detén el botón Play antes de desbloquear puertas.", "Entendido");
+                return;
+            }
+
+            var scene = SceneManager.GetActiveScene();
+            int disabledCount = 0;
+
+            var allTransforms = Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var t in allTransforms)
+            {
+                if (t == null || t.gameObject == null) continue;
+                string n = t.name;
+
+                // No tocar nuestra compuerta oficial ni nuestro portal ni el jugador
+                if (n.Contains("CompuertaLaser") || n.Contains("Barricada_") || n.Contains("Barrera_") || n.Contains("Armanya_"))
+                    continue;
+
+                bool isLegacyBlocker =
+                    n.StartsWith("Door") ||
+                    n == "Tilemap_WaterBlockers" ||
+                    n.StartsWith("WallTile") ||
+                    n.Contains("AproachingWall");
+
+                if (isLegacyBlocker && t.gameObject.activeSelf)
+                {
+                    t.gameObject.SetActive(false);
+                    disabledCount++;
+                }
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+
+            EditorUtility.DisplayDialog(
+                "Puertas Viejas Desbloqueadas",
+                $"Se desactivaron {disabledCount} bloqueos/puertas heredadas de 2DGamekit en '{scene.name}'.\n\n" +
+                "Tu compuerta oficial de Armanya (CompuertaLaser_Nexo) y tus plataformas siguen intactas.",
+                "¡Perfecto!"
+            );
+        }
+
         static Vector3 EnsurePortalInScene(string scenePath, string nextScene, LoreClueId clueId)
         {
             var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Armanya.Gameplay;
+using Gamekit2D;
 
 namespace Armanya.Abilities
 {
@@ -79,7 +80,9 @@ namespace Armanya.Abilities
 
             bool layerMatch = (targets.value & (1 << other.gameObject.layer)) != 0;
             bool isEnemyTag = other.CompareTag("Enemy");
-            if (!layerMatch && !isEnemyTag) return;
+            var gamekitDamageable = other.GetComponent<Damageable>() ?? other.GetComponentInParent<Damageable>();
+            bool isDestructibleProp = gamekitDamageable != null && other.GetComponentInParent<Armanya.Player.PlayerController2D>() == null;
+            if (!layerMatch && !isEnemyTag && !isDestructibleProp) return;
 
             bool hitSomething = false;
 
@@ -103,6 +106,18 @@ namespace Armanya.Abilities
             else if (damage > 0f && other.TryGetComponent<IDamageable>(out var dmgTarget))
             {
                 dmgTarget.TakeDamage(damage, owner);
+                hitSomething = true;
+            }
+            else if (isDestructibleProp && damage > 0f)
+            {
+                // Permite que los ataques de Armanya destruyan paredes/columnas/interruptores heredados de 2DGamekit
+                gamekitDamageable.SetHealth(gamekitDamageable.CurrentHealth - 1);
+                if (gamekitDamageable.CurrentHealth <= 0)
+                {
+                    gamekitDamageable.OnDie.Invoke(null, gamekitDamageable);
+                    if (gamekitDamageable.disableOnDeath)
+                        gamekitDamageable.gameObject.SetActive(false);
+                }
                 hitSomething = true;
             }
 
