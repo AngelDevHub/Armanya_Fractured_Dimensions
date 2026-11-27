@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Armanya.Gameplay;
 using Armanya.Interactables;
 using Armanya.Player;
@@ -107,26 +108,48 @@ namespace Armanya.Enemies
             {
                 victoryBoxStyle = new GUIStyle(GUI.skin.box)
                 {
-                    fontSize = 19,
+                    fontSize = 18,
                     fontStyle = FontStyle.Bold,
                     wordWrap = true,
-                    alignment = TextAnchor.MiddleCenter,
-                    padding = new RectOffset(20, 20, 16, 16)
+                    alignment = TextAnchor.UpperCenter,
+                    padding = new RectOffset(22, 22, 18, 18)
                 };
                 victoryBoxStyle.normal.textColor = new Color(0.75f, 1f, 0.9f, 1f);
             }
 
-            float w = Mathf.Min(640f, Screen.width - 40f);
-            float h = 155f;
-            Rect r = new Rect((Screen.width - w) * 0.5f, (Screen.height - h) * 0.25f, w, h);
+            int finalScore = GameSession.Instance != null ? GameSession.Instance.CurrentScore : 0;
+
+            float w = Mathf.Min(660f, Screen.width - 40f);
+            float h = 230f;
+            float x = (Screen.width - w) * 0.5f;
+            float y = (Screen.height - h) * 0.28f;
+
             GUI.Box(
-                r,
-                "★ BRECHA ESTABILIZADA — ARMANYA HA DESPERTADO ★\n\n" +
+                new Rect(x, y, w, h),
+                "★ BRECHA ESTABILIZADA — ¡HAS GANADO! ★\n\n" +
                 "Los 3 Generadores de Fractura han sido reparados.\n" +
                 "Angus, Anya y Aleek demostraron que ninguna crisis se supera con apatía ni violencia,\n" +
-                "sino con empatía colectiva y responsabilidad compartida.",
+                "sino con empatía colectiva y responsabilidad compartida.\n\n" +
+                $"Puntaje Final: {finalScore} pts",
                 victoryBoxStyle
             );
+
+            float btnW = 200f;
+            float btnH = 42f;
+            float btnY = y + h - btnH - 16f;
+            float gap = 24f;
+
+            if (GUI.Button(new Rect(x + (w * 0.5f) - btnW - (gap * 0.5f), btnY, btnW, btnH), "Jugar de Nuevo"))
+            {
+                Time.timeScale = 1f;
+                SceneManager.LoadScene("Level1_GrietaArida");
+            }
+
+            if (GUI.Button(new Rect(x + (w * 0.5f) + (gap * 0.5f), btnY, btnW, btnH), "Volver al Menú"))
+            {
+                Time.timeScale = 1f;
+                SceneManager.LoadScene("Menu_Inicio");
+            }
         }
 
         bool AreAllGeneratorsRepaired()

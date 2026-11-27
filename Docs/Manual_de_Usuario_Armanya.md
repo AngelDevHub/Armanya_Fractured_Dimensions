@@ -34,7 +34,7 @@ Cuando una fuerza extraterrestre ataca y aparentemente abduce a Ankea, una onda 
 | Acción | Teclado / Ratón | Descripción |
 | :--- | :--- | :--- |
 | **Moverse** | `A` / `D` o Flechas `←` / `→` | Desplaza al héroe lateralmente por las plataformas. |
-| **Saltar** | `Espacio` | Realiza un salto ágil para cruzar fisuras y obstáculos. |
+| **Saltar / Doble Salto** | `Espacio` (pulsar 2 veces) | Realiza un salto ágil; presiona `Espacio` de nuevo en el aire para hacer un **Doble Salto** y alcanzar plataformas altas. |
 | **Ataque Básico** | `J` o `Clic Izquierdo` | Ejecuta el ataque principal del héroe activo. |
 | **Poder Secreto / Restauración** | `K` o `Clic Derecho` | Activa el poder especial para aturdir enemigos y **restaurar objetos del entorno** (bombas de agua, barricadas, consolas, generadores). |
 | **Cruzar Portal Dimensional** | `S` (o `↓` / `E`) | Al estar frente al portal y tener la pista del nivel, viaja a la siguiente dimensión. |

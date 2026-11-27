@@ -16280,6 +16280,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Armanya_DimensionPortal
       objectReference: {fileID: 0}
+    - target: {fileID: 5469903432618013298, guid: bb31056652e98544ea32d215c0a8856d, type: 3}
+      propertyPath: nextSceneName
+      value: Level2_DistritoCaos
+      objectReference: {fileID: 0}
     - target: {fileID: 7890860761899167563, guid: bb31056652e98544ea32d215c0a8856d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 27.53
@@ -23627,6 +23631,8 @@ MonoBehaviour:
   groundLayers:
     serializedVersion: 2
     m_Bits: 2147483904
+  maxAirJumps: 1
+  airJumpForceMultiplier: 0.95
 --- !u!70 &1405115173
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

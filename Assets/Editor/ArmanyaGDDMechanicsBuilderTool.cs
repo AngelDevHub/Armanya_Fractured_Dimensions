@@ -28,6 +28,7 @@ namespace Armanya.EditorTools
         const string DestructableWallPath = "Assets/2DGamekit/Prefabs/Interactables/DestructableWall.prefab";
         const string DoorPrefabPath = "Assets/2DGamekit/Prefabs/Interactables/Door.prefab";
         const string AnkeaPrefabPath = "Assets/Prefabs/Monsters/Ankea_Boss.prefab";
+        const string PortalPrefabPath = "Assets/Prefabs/Interactables/Armanya_DimensionPortal.prefab";
 
         [MenuItem("Armanya/GDD 100%/Instalar TODO (Niveles 1-3 + Tag-Team Nivel 4)", false, 200)]
         public static void InstallAllGDDMechanics()
@@ -40,6 +41,7 @@ namespace Armanya.EditorTools
             InstallLevel1Mechanics();
             InstallLevel2Mechanics();
             InstallLevel3Mechanics();
+            InstallPortalsInLevels123();
             InstallLevel4TagTeamAndBoss();
 
             if (!string.IsNullOrEmpty(originalScene))
@@ -261,6 +263,145 @@ namespace Armanya.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log("[Armanya GDD] Nivel 4 (Ruinas Finales) configurado con Tag-Team [1] Angus, [2] Anya, [3] Aleek y Ankea Boss.");
+        }
+
+        [MenuItem("Armanya/GDD 100%/5. Colocar Portal Dimensional en Niveles 1, 2 y 3", false, 214)]
+        public static void InstallPortalsInLevels123()
+        {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Modo Play activo", "Detén el botón Play antes de colocar los portales en las escenas.", "Entendido");
+                return;
+            }
+
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                return;
+
+            string originalScene = SceneManager.GetActiveScene().path;
+
+            Vector3 p1 = EnsurePortalInScene(Level1Path, "Level2_DistritoCaos", LoreClueId.BitacoraHidrica);
+            Vector3 p2 = EnsurePortalInScene(Level2Path, "Level3_NexoOrbital", LoreClueId.ManifiestoRoto);
+            Vector3 p3 = EnsurePortalInScene(Level3Path, "Level4_RuinasFinales", LoreClueId.ConsolaCentral);
+
+            if (!string.IsNullOrEmpty(originalScene))
+                EditorSceneManager.OpenScene(originalScene, OpenSceneMode.Single);
+
+            var currentPortal = Object.FindFirstObjectByType<ArmanyaPortalController>(FindObjectsInactive.Include);
+            if (currentPortal != null)
+            {
+                Selection.activeGameObject = currentPortal.gameObject;
+                if (SceneView.lastActiveSceneView != null) SceneView.lastActiveSceneView.FrameSelected();
+            }
+
+            EditorUtility.DisplayDialog(
+                "Portales Dimensionales Colocados",
+                "Se colocaron y guardaron los portales visibles en:\n\n" +
+                $"• Nivel 1 (Grieta Árida): X={p1.x:F1}, Y={p1.y:F1} -> Nivel 2\n" +
+                $"• Nivel 2 (Distrito Caos): X={p2.x:F1}, Y={p2.y:F1} -> Nivel 3\n" +
+                $"• Nivel 3 (Nexo Orbital): X={p3.x:F1}, Y={p3.y:F1} -> Nivel 4\n\n" +
+                "El portal de tu escena actual quedó seleccionado en la Jerarquía.",
+                "¡Listo!"
+            );
+        }
+
+        [MenuItem("Armanya/GDD 100%/Colocar Portal AQUÍ (Escena Actual)", false, 215)]
+        public static void PlacePortalInCurrentScene()
+        {
+            if (EditorApplication.isPlaying)
+            {
+                EditorUtility.DisplayDialog("Modo Play activo", "Detén el botón Play para colocar y guardar el portal.", "Entendido");
+                return;
+            }
+
+            var scene = SceneManager.GetActiveScene();
+            string sn = scene.name.ToLowerInvariant();
+            string nextScene = "Level2_DistritoCaos";
+            LoreClueId clue = LoreClueId.BitacoraHidrica;
+
+            if (sn.Contains("caos") || sn.Contains("level2"))
+            {
+                nextScene = "Level3_NexoOrbital";
+                clue = LoreClueId.ManifiestoRoto;
+            }
+            else if (sn.Contains("nexo") || sn.Contains("level3"))
+            {
+                nextScene = "Level4_RuinasFinales";
+                clue = LoreClueId.ConsolaCentral;
+            }
+
+            Vector3 pos = EnsurePortalInOpenScene(scene, nextScene, clue);
+            var currentPortal = Object.FindFirstObjectByType<ArmanyaPortalController>(FindObjectsInactive.Include);
+            if (currentPortal != null)
+            {
+                Selection.activeGameObject = currentPortal.gameObject;
+                if (SceneView.lastActiveSceneView != null) SceneView.lastActiveSceneView.FrameSelected();
+            }
+
+            EditorUtility.DisplayDialog(
+                "Portal Creado en Escena Actual",
+                $"Se colocó 'Armanya_DimensionPortal' en ({pos.x:F1}, {pos.y:F1}) apuntando a {nextScene}.\nYa quedó seleccionado para que puedas moverlo a donde quieras.",
+                "¡Genial!"
+            );
+        }
+
+        static Vector3 EnsurePortalInScene(string scenePath, string nextScene, LoreClueId clueId)
+        {
+            var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            return EnsurePortalInOpenScene(scene, nextScene, clueId);
+        }
+
+        static Vector3 EnsurePortalInOpenScene(Scene scene, string nextScene, LoreClueId clueId)
+        {
+            var existing = Object.FindFirstObjectByType<ArmanyaPortalController>(FindObjectsInactive.Include);
+            GameObject portalObj = existing != null ? existing.gameObject : null;
+
+            if (portalObj == null)
+            {
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PortalPrefabPath);
+                GameObject pilar = GameObject.Find("Pilar_Dimensional");
+                Vector3 pos = pilar != null ? pilar.transform.position : GetPlayerAnchorPosition() + new Vector3(12f, 0f, 0f);
+
+                if (prefab != null)
+                {
+                    portalObj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                    portalObj.name = "Armanya_DimensionPortal";
+                    portalObj.transform.position = pos;
+                }
+                else
+                {
+                    // Fallback seguro por si el prefab no existiera
+                    portalObj = new GameObject("Armanya_DimensionPortal");
+                    portalObj.transform.position = pos;
+                    var sr = portalObj.AddComponent<SpriteRenderer>();
+                    sr.sprite = ExtractFirstSpriteFromPrefab(DoorPrefabPath);
+                    sr.color = new Color(0.25f, 0.95f, 1f, 1f);
+                    sr.sortingOrder = 8;
+                    var col = portalObj.AddComponent<BoxCollider2D>();
+                    col.isTrigger = true;
+                    col.size = new Vector2(2.4f, 3.2f);
+                    portalObj.AddComponent<ArmanyaPortalController>();
+                }
+            }
+
+            // Asegurar material visible URP 2D
+            var defaultMat = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
+            foreach (var sr in portalObj.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                if (defaultMat != null) sr.sharedMaterial = defaultMat;
+            }
+
+            var ctrl = portalObj.GetComponent<ArmanyaPortalController>();
+            if (ctrl != null)
+            {
+                var so = new SerializedObject(ctrl);
+                so.FindProperty("dimensionClue").enumValueIndex = (int)clueId;
+                so.FindProperty("nextSceneName").stringValue = nextScene;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            return portalObj.transform.position;
         }
 
         static GameObject EnsureHeroClone(GameObject template, string heroObjName, Vector3 pos, string spritePath, string basicPath, string secretPath)

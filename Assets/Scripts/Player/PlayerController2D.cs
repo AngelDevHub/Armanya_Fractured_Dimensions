@@ -22,6 +22,12 @@ namespace Armanya.Player
         [Tooltip("Capas que cuentan como suelo.")]
         [SerializeField] protected LayerMask groundLayers;
 
+        [Header("Doble Salto")]
+        [Tooltip("Saltos extra permitidos en el aire (1 = doble salto).")]
+        [SerializeField, Min(0)] protected int maxAirJumps = 1;
+        [Tooltip("Multiplicador de impulso para el salto en el aire.")]
+        [SerializeField, Range(0.5f, 1.3f)] protected float airJumpForceMultiplier = 0.95f;
+
         protected Rigidbody2D rb;
 
         /// <summary>Dirección horizontal actual: -1, 0 o 1.</summary>
@@ -33,6 +39,7 @@ namespace Armanya.Player
         float coyoteCounter;
         float jumpBufferCounter;
         bool jumpHeld;
+        int airJumpsRemaining;
 
         protected virtual void Awake()
         {
@@ -83,7 +90,17 @@ namespace Armanya.Player
 
         protected virtual void HandleTimers()
         {
-            coyoteCounter = IsGrounded ? profile.coyoteTime : coyoteCounter - Time.deltaTime;
+            if (IsGrounded)
+            {
+                coyoteCounter = profile.coyoteTime;
+                if (rb != null && rb.linearVelocity.y <= 0.1f)
+                    airJumpsRemaining = maxAirJumps;
+            }
+            else
+            {
+                coyoteCounter -= Time.deltaTime;
+            }
+
             jumpBufferCounter -= Time.deltaTime;
         }
 
@@ -108,12 +125,23 @@ namespace Armanya.Player
 
         protected virtual void TryJump()
         {
-            if (jumpBufferCounter > 0f && coyoteCounter > 0f)
+            if (jumpBufferCounter <= 0f) return;
+
+            if (coyoteCounter > 0f)
             {
+                // Primer salto (desde el suelo o coyote time)
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, profile.jumpForce);
                 jumpBufferCounter = 0f;
                 coyoteCounter = 0f;
                 OnJump();
+            }
+            else if (airJumpsRemaining > 0)
+            {
+                // Doble salto en el aire
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, profile.jumpForce * airJumpForceMultiplier);
+                airJumpsRemaining--;
+                jumpBufferCounter = 0f;
+                OnAirJump();
             }
         }
 
@@ -129,6 +157,9 @@ namespace Armanya.Player
 
         /// <summary>Gancho para que Angus/Anya/Aleek añadan sonido, animación o habilidades.</summary>
         protected virtual void OnJump() { }
+
+        /// <summary>Gancho al ejecutar el doble salto en el aire.</summary>
+        protected virtual void OnAirJump() => OnJump();
 
         void OnDrawGizmosSelected()
         {
